@@ -14,12 +14,19 @@
 ;; 
 (defun test-generator-on-known-values ()
   (let ((generator (make-generator :maxiter maxiter-for-test)))
-    (mapcar 
-     (lambda (pair)
-       (equal
-	(get-value-at-point generator (car pair))
-	(cadr pair)))
-     mandlebrot-set-known-values)))
+    (loop        
+       with success-so-far = t
+       for pair in mandlebrot-set-known-values
+ 	 do (setf success-so-far 
+		  (let* ((point (first pair))
+			 (expected (second pair))
+			 (result (get-value-at-point generator point))
+			 (this-test-did-pass (equal result expected)))
+		    (format t "at ~16,16f expected ~16a got ~16a : ~a~%"
+			    point expected result
+			    (if this-test-did-pass "PASS" "FAIL"))
+		    (and success-so-far this-test-did-pass)))
+       finally (return success-so-far))))
 
 (defun run-unit-tests ()
   (and 
