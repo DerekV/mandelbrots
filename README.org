@@ -1,0 +1,32 @@
+
+* Purpose
+  This is intended to be a sort-of kata for me.
+  I will create multiple implementations of a simple mandlebrot generator, in order to practice programming and learn or refresh language skills.
+
+* Specification / Requirements
+** Manditory
+   To be considered correct, 
+   1. 
+      - Given
+	 1. The program executable $MANDLEBROT located in $PATH
+	 2. Four 'double precision' floating point numbers for the real and complex range of the set, 
+	    $RMIN $RMAX $IMIN $IMAX (eg -1.125 2.000 -1.8500502 1.562)
+	 3. A positive integer $ITER representing the maximum iterations
+	 4. $OUTFILE representing a file location where there is no current file.  eg "/tmp/non-existing-file-1038561028475.raw"
+      - Then
+	1. Following execution of this shell command 
+	   $PATH\$MANDLEBROT -rmin $RMIN -rmax $RMAX -imin $IMIN -imax $IMAX -iter $ITER -out $OUTFILE
+	2. There is a file containing a rendering the mandlebrot set in the file specified by -out
+	   which matches a refrence rendering exactly bit for bit.
+	   (output format to be determined) 
+
+** Optional
+   1. Accept command line arguments in any order
+   2. Accept optional comandline argument -g, which will display a graphics window and show the rendering in real-time (or close enough).
+   3. Optimization
+   4. Accept any of -jpeg, -png, -bmp, -tiff and output this format to the outfile instead of raw.
+   5. With no -out option, output to stdout
+   6. Accept arbitrary precision floating point range numbers and max iteration count.
+   7. 
+
+
