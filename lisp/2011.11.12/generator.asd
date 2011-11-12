@@ -13,7 +13,8 @@
   :long-description ""
   :serial t ;; the dependencies are linear.
   :components ((:file "packages")
-               (:file "generatorm")))
+               (:file "generator")
+	       (:file "unittests")))
 
 ;  :depends-on ()
 
