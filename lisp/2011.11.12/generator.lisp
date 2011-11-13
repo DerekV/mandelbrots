@@ -54,12 +54,17 @@
 (defun get-next-point (crawler)
   (funcall crawler))
 
-
 (defun create-list-accross-line (from to resolution maxiters)
   (let ((c (make-crawler :from from :to to :resolution resolution))
 	(g (make-generator :maxiter maxiters)))
     (loop for point = (get-next-point c) then (get-next-point c) while point
        collect (get-value-at-point g point))))
+
+(defmacro map-iteration-to-color (iteration slot-for-red slot-for-blue slot-for-green)
+ `(progn 
+    (setf ,slot-for-red (mod (* ,iteration 77) 255))
+    (setf ,slot-for-blue (mod (* ,iteration 21) 255))
+    (setf ,slot-for-green (mod (* ,iteration 5) 255))))
 
 (defun create-png (&key from to resolution maxiters filepath)
   (let* ((row-crawler (make-crawler
@@ -68,7 +73,7 @@
 		       :resolution resolution))
 	 (g (make-generator :maxiter maxiters))
 	 (png (make-instance 'zpng:png
-			     :color-type :grayscale
+			     :color-type :truecolor
 			     :width resolution
 			     :height resolution))
 	 (image (zpng:data-array png)))
@@ -85,9 +90,9 @@
 		for col = #2=(get-next-point col-crawler) then #2#
 		for colnum from 0 upto resolution
 		while col
-		do (setf (aref image colnum rownum 0)
-			 (- 255
-			    (mod
-				(get-value-at-point g col)
-			     255))))))
+		do (map-iteration-to-color 
+		     (get-value-at-point g col)
+		     (aref image colnum rownum 0)
+		     (aref image colnum rownum 1)
+		     (aref image colnum rownum 2)))))
      (zpng:write-png png filepath)))
