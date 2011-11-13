@@ -9,13 +9,27 @@
 (defun maxiter (generator)
   generator)
 
-;; unimplemented!
 (defun get-value-at-point (generator C)
-  (loop for i below (maxiter generator)
-       for Z = C then (+ (* Z Z) C)
-       while (< (abs Z) 2.0)
-     finally (return i)))
+  (declare (optimize (compilation-speed 0) (debug 0) (safety 0) (space 0) (speed 3))
+	   (type (complex (single-float)) C))
+  (let ((Z C)
+	(i 0)
+	(maxiter (maxiter generator)))
+    (declare (type (complex (single-float)) Z)
+	     (type fixnum i)
+	     (type fixnum maxiter))
+    (loop 
+       (if (> (incf i) maxiter) (return i))
+       (if (> (abs 
+	       (setf Z 
+		     (+ (* Z Z) C)))
+	      2.0)
+	   (return i)))))
 
+;; (loop for i below (maxiter generator)
+;;    while (< (abs Z) 2.0)
+;;    do (+ (* Z Z) C)
+;;    finally (return i))))
 ;; (defclass crawler () 
 ;;   ((cmin
 ;;     :initarg :from
