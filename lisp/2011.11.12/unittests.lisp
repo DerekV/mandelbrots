@@ -28,6 +28,48 @@
 		    (and success-so-far this-test-did-pass)))
        finally (return success-so-far))))
 
+
+(defun test-crawler ()
+  (let* (clist 
+	elist
+	(start-at-point #C(-1.0 -1.0))
+	(end-at-point #C(1.2 1.2))
+	(res-to-test 10)
+	(crawler (make-crawler :from start-at-point 
+			       :to end-at-point
+			       :resolution res-to-test)))
+    (loop
+       for cpoint = (get-next-point crawler) then (get-next-point crawler)
+       for epoint = start-at-point then (+ epoint 
+					   (/ 
+					    (- end-at-point start-at-point)
+					    (- res-to-test 1)))
+       while (not (null cpoint))
+       collect cpoint into cpointcollection
+       collect epoint into epointcollection
+       finally (progn (setf clist cpointcollection)
+		      (setf elist epointcollection)))
+    (format t "~{~a, ~}~%" clist)
+    (format t "~{~a, ~}~%" elist)
+    (let 
+	((test-is-succeeding t))
+      (mapcar 
+       (lambda (pair)
+	      (if (second pair)
+		  (format t "~a : PASS ~%" (first pair))
+		  (format t "~a : FAIL ~%" (first pair)))
+	      (setf test-is-succeeding (and test-is-succeeding (second pair))))
+       `(
+	 ("first point should be same as 'from'" ,(equalp (first clist) start-at-point))
+	 ("end point should be pretty close 'to:" , (< (abs (- (car (last clist)) end-at-point))
+						      (* 0.0000001 res-to-test)))
+	 ("should be same length as simulated list" ,(equalp (length clist) (length elist)))
+	 ("length should be same as requested resolution" ,(equalp (length clist) res-to-test))
+	 ("should be equal to simulated list" ,(equalp clist elist)))))))
+
+  
+
 (defun run-unit-tests ()
   (and 
-   (test-generator-on-known-values)))
+   (test-generator-on-known-values)
+   (test-crawler)))

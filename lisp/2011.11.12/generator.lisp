@@ -16,6 +16,39 @@
        while (< (abs Z) 2.0)
      finally (return i)))
 
+;; (defclass crawler () 
+;;   ((cmin
+;;     :initarg :from
+;;     :reader :from)
+;;    (cmax
+;;     :initarg :to
+;;     :reader :to)
+;;    (resolution
+;;     :initarg :resolution
+;;     :reader :resolution)))
+
+;; (defgeneric get-next-point (crawler))
+
+(defun make-crawler (&key from to resolution)
+  (let ((increment (/ (- to from) (- resolution 1)))
+	(next from))
+    (lambda ()
+      (if next
+	  (let ((current next))
+	    (if (or (> (realpart current) (realpart to))
+		    (> (imagpart current) (imagpart to)))
+		(setf next nil)
+		(progn 
+		  (setf next (+ current increment))
+		  current)))))))
+
+(defun get-next-point (crawler)
+  (funcall crawler))
+	    
+      
+
+
+
 
    
-    
+  
