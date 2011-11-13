@@ -117,5 +117,9 @@
 		for colnum from 0 upto resolution
 		while col	
 		do (setf (aref image colnum rownum 0)
-			 (get-value-at-point g col)))))
+			 (- 255 
+			    (mod 
+			     (* 7 
+				(get-value-at-point g col)) 
+			     255))))))
      (zpng:write-png png "/tmp/mandlebrot.png")))
