@@ -4,8 +4,17 @@
 ;; try this from repl
 ;; (create-png :from #C(-0.8 -0.8) :to #C(0.3 0.3) :resolution 3004 :maxiters 254 :filepath "~/tmp/mand.png")
 
-;; for now, since state generator really has is maxitors, we will simply make it that.
-;; (simulating a clos like object with a maxitor slot)
+
+;; Generator object:
+;; Responsible for determining whether a point is within the set,
+;; or more acurately, if it is not in the set, or stopping at maxiters.
+;; Call get-value-at-point against it, to return the number of iterations up to maxiters
+;;   for the point.
+
+;; for now, since the only state a generator really has is maxitors, 
+;;  we will simply make it that instead of a complex type.
+;; In other words, we are simulating a clos like object with a maxitor slot,
+;;  but its just a variable we expect to hold an int.
 (defun make-generator (&key maxiter)
   maxiter)
 
@@ -38,6 +47,12 @@
        (setq imag-sq (* imagz imagz))
        (incf i))))
 
+;; Crawler object : 
+;;  In essense this is an iterator of a complex type.
+;;  It iterates accross a range linearly in even increments.
+;; Calling "get-next-point" against it returns a complex value and
+;;  as a side effect increments the crawler.
+
 (defun make-crawler (&key from to resolution)
   (let ((increment (/ (- to from) (- resolution 1)))
 	(next from))
@@ -54,17 +69,28 @@
 (defun get-next-point (crawler)
   (funcall crawler))
 
+;; -------------
+;; The following functions are useful for actually getting data about the set.
+
+
+;; given a range in the complex plain, calculate the values at :resolution points
+;;  linearly accross this range and returns them as a list.
+ 
 (defun create-list-accross-line (from to resolution maxiters)
   (let ((c (make-crawler :from from :to to :resolution resolution))
 	(g (make-generator :maxiter maxiters)))
     (loop for point = (get-next-point c) then (get-next-point c) while point
        collect (get-value-at-point g point))))
 
+;; given a integer _iteration_, maps RGB values into three setf-able slots (8 bits per field)
 (defmacro map-iteration-to-color (iteration slot-for-red slot-for-blue slot-for-green)
  `(progn 
     (setf ,slot-for-red (mod (* ,iteration 77) 255))
     (setf ,slot-for-blue (mod (* ,iteration 21) 255))
     (setf ,slot-for-green (mod (* ,iteration 5) 255))))
+
+;; create a png image on the disk at :filepath for the set spanning acrross :from :to,
+;; with :resolution x resolution pixels, :maxiters iteration limit
 
 (defun create-png (&key from to resolution maxiters filepath)
   (let* ((row-crawler (make-crawler
