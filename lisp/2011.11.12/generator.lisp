@@ -1,4 +1,4 @@
-(in-package #:com.derekv.mandlebrots.lisp.2011-11-12.generator)
+(in-package #:com.derekv.mandelbrots.lisp.2011-11-12.generator)
 
 
 ;; for now, since state generator really has is maxitors, we will simply make it that.
@@ -90,7 +90,7 @@
 ;;   (dolist (row data) (incf rownum) (setf colnum 0)
 ;; 	  (dolist (item row) (incf colnum)
 ;; 		  (setf (aref image colnum rownum 1) item)))
-;;   (zpng:write-png png "/tmp/mandlebrot.png"))
+;;   (zpng:write-png png "/tmp/mandelbrot.png"))
 
 (defun create-png (from to resolution maxiters)
   (let* ((row-crawler (make-crawler 
@@ -122,4 +122,4 @@
 			     (* 7 
 				(get-value-at-point g col)) 
 			     255))))))
-     (zpng:write-png png "/tmp/mandlebrot.png")))
+     (zpng:write-png png "/tmp/mandelbrot.png")))

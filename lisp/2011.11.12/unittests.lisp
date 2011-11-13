@@ -1,11 +1,11 @@
-(in-package #:com.derekv.mandlebrots.lisp.2011-11-12.generator)
+(in-package #:com.derekv.mandelbrots.lisp.2011-11-12.generator)
 
 
 ;; Store a list of known values in the set.
 ;; note 
 ;; as we get more detailed, 
 ;;  we'll need to adjust this to take into account the max iterations 
-(defparameter mandlebrot-set-known-values 
+(defparameter mandelbrot-set-known-values 
   '((#C(10.0 10.0) 0)
     (#C(0.0 0.0) 100)))
 
@@ -16,7 +16,7 @@
   (let ((generator (make-generator :maxiter maxiter-for-test)))
     (loop        
        with success-so-far = t
-       for pair in mandlebrot-set-known-values
+       for pair in mandelbrot-set-known-values
  	 do (setf success-so-far 
 		  (let* ((point (first pair))
 			 (expected (second pair))
