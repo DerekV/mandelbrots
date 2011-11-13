@@ -46,9 +46,54 @@
   (funcall crawler))
 	    
       
+(defun create-list-accross-line (from to resolution maxiters)
+  (let ((c (make-crawler :from from :to to :resolution resolution))
+	(g (make-generator :maxiter maxiters)))
+    (loop for point = (get-next-point c) then (get-next-point c) while point
+       collect (get-value-at-point g point))))
 
 
+;; (defun create-set-in-memory 
+;;     (let ((row-crawler (make-crawler :from #C(-1.2 -1.2) :to #C(-1.2 1.5) :resolution 198)))
+;;       (loop for row = (get-next-point row-crawler) then (get-next-point row-crawler)
+;; 	 while row
+;; 	 collect (create-list-accross-line row (+ row #C(1.7 0.0)) 198 255))) )
 
+;; (let* ((png (make-instance 'zpng:png
+;; 			    :color-type :grayscale-alpha
+;; 			    :width 199
+;; 			    :height 199))
+;; 	(image (zpng:data-array png))
+;;        (rownum 0) (colnum 0))
+;;   (dolist (row data) (incf rownum) (setf colnum 0)
+;; 	  (dolist (item row) (incf colnum)
+;; 		  (setf (aref image colnum rownum 1) item)))
+;;   (zpng:write-png png "/tmp/mandlebrot.png"))
 
-   
-  
+(defun create-png (from to resolution maxiters)
+  (let* ((row-crawler (make-crawler 
+		       :from from 
+		       :to (+ (* #C(1 0) (realpart from)) (* #C(0 1) (imagpart to)))
+		       :resolution resolution))
+	 (g (make-generator :maxiter maxiters))
+	 (png (make-instance 'zpng:png
+			     :color-type :grayscale
+			     :width resolution
+			     :height resolution))
+	 (image (zpng:data-array png)))
+     (loop 
+	for row = #1=(get-next-point row-crawler) then #1#
+	for rownum from 1 upto resolution
+	while row
+	do (let ((col-crawler 
+		  (make-crawler 
+		   :from row
+		   :to (+ (* #C(1 0) (realpart to)) (* #C(0 1) (imagpart row)))
+		   :resolution resolution)))
+	     (loop
+		for col = #2=(get-next-point col-crawler) then #2#
+		for colnum from 0 upto resolution
+		while col	
+		do (setf (aref image colnum rownum 0)
+			 (get-value-at-point g col)))))
+     (zpng:write-png png "/tmp/mandlebrot.png")))
