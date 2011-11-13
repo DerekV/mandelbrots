@@ -14,7 +14,6 @@
   :serial t ;; the dependencies are linear.
   :components ((:file "packages")
                (:file "generator")
-	       (:file "unittests")))
-
-;  :depends-on ()
+	       (:file "unittests"))
+  :depends-on ("zpng"))
 

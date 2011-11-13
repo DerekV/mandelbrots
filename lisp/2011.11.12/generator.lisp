@@ -26,13 +26,14 @@
 	     (type single-float realz)
 	     (type single-float imagc)
 	     (type single-float real-sq))
-    (loop 
-       (if (> (incf i) maxiter) (return i))
+    (loop
+       (if (>= i maxiter) (return i))
        (if (> (+ real-sq imag-sq) 4) (return i))
        (setq imagz (+ (* (* realz imagz) 2) imagc))
        (setq realz (+ (- real-sq imag-sq) realc))
        (setq real-sq (* realz realz))
-       (setq imag-sq (* imagz imagz)))))
+       (setq imag-sq (* imagz imagz))
+       (incf i))))
 
 ;; (loop for i below (maxiter generator)
 ;;    while (< (abs Z) 2.0)
@@ -95,7 +96,7 @@
 (defun create-png (from to resolution maxiters)
   (let* ((row-crawler (make-crawler 
 		       :from from 
-		       :to (+ (* #C(1 0) (realpart from)) (* #C(0 1) (imagpart to)))
+		       :to (complex (realpart from) (imagpart to))
 		       :resolution resolution))
 	 (g (make-generator :maxiter maxiters))
 	 (png (make-instance 'zpng:png
@@ -103,14 +104,14 @@
 			     :width resolution
 			     :height resolution))
 	 (image (zpng:data-array png)))
-     (loop 
+     (loop
 	for row = #1=(get-next-point row-crawler) then #1#
-	for rownum from 1 upto resolution
+	for rownum from 0 upto resolution
 	while row
 	do (let ((col-crawler 
 		  (make-crawler 
 		   :from row
-		   :to (+ (* #C(1 0) (realpart to)) (* #C(0 1) (imagpart row)))
+		   :to (complex (realpart to) (imagpart row))
 		   :resolution resolution)))
 	     (loop
 		for col = #2=(get-next-point col-crawler) then #2#
@@ -119,7 +120,6 @@
 		do (setf (aref image colnum rownum 0)
 			 (- 255 
 			    (mod 
-			     (* 7 
-				(get-value-at-point g col)) 
+				(get-value-at-point g col)
 			     255))))))
      (zpng:write-png png "/tmp/mandelbrot.png")))
