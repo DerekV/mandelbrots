@@ -4,7 +4,6 @@
 ;; try this from repl
 ;; (create-png :from #C(-0.8 -0.8) :to #C(0.3 0.3) :resolution 3004 :maxiters 254 :filepath "~/tmp/mand.png")
 
-
 ;; Generator object:
 ;; Responsible for determining whether a point is within the set,
 ;; or more acurately, if it is not in the set, or stopping at maxiters.
@@ -15,19 +14,22 @@
 ;;  we will simply make it that instead of a complex type.
 ;; In other words, we are simulating a clos like object with a maxitor slot,
 ;;  but its just a variable we expect to hold an int.
+
+(declaim (inline make-generator))
 (defun make-generator (&key maxiter)
   maxiter)
 
+(declaim (inline maxiter))
 (defun maxiter (generator)
   generator)
 
 (defun get-value-at-point (generator C)
   (declare (optimize (compilation-speed 0) (debug 0) (safety 0) (space 0) (speed 3))
-	   (type (complex (single-float)) C))
+	   (type (complex single-float) C))
   (let* ((realz (realpart C))
 	(imagz (imagpart C))
-	(realc (realpart C))
-	(imagc (imagpart C))
+	(realc realz)
+	(imagc imagz)
 	(i 0)
 	(maxiter (maxiter generator))
 	(real-sq (* realz realz))
@@ -39,12 +41,13 @@
 	     (type single-float imagc)
 	     (type single-float real-sq))
     (loop
-       (if (>= i maxiter) (return i))
-       (if (> (+ real-sq imag-sq) 4) (return i))
-       (setq imagz (+ (* (* realz imagz) 2) imagc))
-       (setq realz (+ (- real-sq imag-sq) realc))
-       (setq real-sq (* realz realz))
-       (setq imag-sq (* imagz imagz))
+       (if (or (>= i maxiter)
+               (> (+ real-sq imag-sq) 4.0s0))
+           (return i))
+       (psetq imagz (+ (* 2.0s0 (* realz imagz)) imagc)
+              realz (+ (- real-sq imag-sq) realc))
+       (psetq real-sq (* realz realz)
+              imag-sq (* imagz imagz))
        (incf i))))
 
 ;; Crawler object : 
