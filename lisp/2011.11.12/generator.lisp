@@ -119,6 +119,6 @@
 		do (map-iteration-to-color 
 		     (get-value-at-point g col)
 		     (aref image colnum rownum 0)
-		     (aref image colnum rownum 1)
-		     (aref image colnum rownum 2)))))
+		     (aref image colnum rownum 2)
+		     (aref image colnum rownum 1)))))
      (zpng:write-png png filepath)))
