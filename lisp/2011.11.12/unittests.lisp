@@ -30,43 +30,75 @@
 
 
 (defun test-crawler (start-at-point end-at-point resolution)
+  (format t "testing crawler from ~a to ~a resolution ~a~%" start-at-point end-at-point resolution)
   (let* (clist 
 	elist
 	(crawler (make-crawler :from start-at-point 
 			       :to end-at-point
 			       :resolution resolution)))
-    (loop
-       for cpoint = (get-next-point crawler) then (get-next-point crawler)
-       for epoint = start-at-point then (+ epoint 
-					   (/ 
-					    (- end-at-point start-at-point)
-					    (- resolution 1)))
-       while (not (null cpoint))
-       collect cpoint into cpointcollection
-       collect epoint into epointcollection
-       finally (progn (setf clist cpointcollection)
-		      (setf elist epointcollection)))
-    (format t "~{~a, ~}~%" clist)
-    (format t "~{~a, ~}~%" elist)
-    (let 
-	((test-is-succeeding t))
-      (mapcar 
-       (lambda (pair)
-	      (if (second pair)
-		  (format t "~a : PASS ~%" (first pair))
-		  (format t "~a : FAIL ~%" (first pair)))
-	      (setf test-is-succeeding (and test-is-succeeding (second pair))))
-       `(
-	 ("first point should be same as 'from'" ,(equalp (first clist) start-at-point))
-	 ("end point should be pretty close 'to:" , (< (abs (- (car (last clist)) end-at-point))
-						      (* 0.0000001 resolution)))
-	 ("should be same length as simulated list" ,(equalp (length clist) (length elist)))
-	 ("length should be same as requested resolution" ,(equalp (length clist) resolution))
-	 ("should be equal to simulated list" ,(equalp clist elist)))))))
-
-  
+    (cond 
+      ((= resolution 1) 
+       ;; in this case, get-next point should return 'to' and then nil
+       (let 
+	   ((test-is-succeeding t))
+	 (mapcar 
+	  (lambda (pair)
+	    (if (second pair)
+		(format t "~a : PASS ~%" (first pair))
+		(format t "~a : FAIL ~%" (first pair)))
+	    (setf test-is-succeeding (and test-is-succeeding (second pair))))
+	  `(
+	    ("case resolution = 1, first point returned should be same as destination" ,
+	     (equalp (get-next-point crawler) end-at-point))
+	    ("case resolution = 1, calling get-next-point a second time should return nil" , 
+	     (null (get-next-point crawler)))))))
+      ((> resolution 1) 
+       (loop
+	  repeat resolution   
+	  ;; this fails to test for the possibility that clist 
+	  ;; would have been longer than desired
+	  for cpoint = (get-next-point crawler) then (get-next-point crawler)
+	  for epoint = start-at-point then (+ epoint 
+					      (/ 
+					       (- end-at-point start-at-point)
+					       (- resolution 1)))
+	  while (not (null cpoint))
+	  collect cpoint into cpointcollection
+	  collect epoint into epointcollection
+	  finally (progn (setf clist cpointcollection)
+			 (setf elist epointcollection)))
+  ;;     (format t "~{~a, ~}~%" clist)
+  ;;     (format t "~{~a, ~}~%" elist)
+       (values
+	(let 
+	    ((test-is-succeeding t))
+	 (mapcar 
+	  (lambda (pair)
+	    (if (second pair)
+		(format t "~a : PASS ~%" (first pair))
+		(format t "~a : FAIL ~%" (first pair)))
+	    (setf test-is-succeeding (and test-is-succeeding (second pair))))
+	  `(
+	    ("first point should be same as 'from'" ,(equalp (first clist) start-at-point))
+	    ("end point should be pretty close 'to:" , (< (abs (- (car (last clist)) end-at-point))
+							  (* 0.0000001 resolution)))
+	    ("should be same length as simulated list" ,(equalp (length clist) (length elist)))
+	    ("length should be same as requested resolution" ,(equalp (length clist) resolution))
+	    ("should be equal to simulated list" ,(equalp clist elist))
+	    ("calling get-next-point again should return null after all is finished",
+	     (null (get-next-point crawler))))))
+	elist
+	clist)))))
 
 (defun run-unit-tests ()
-  (and 
+  (and
    (test-generator-on-known-values)
-   (test-crawler #C(-1.0 -1.0) #C(1.0 1.0) 10)))
+   (test-crawler #C(-1.0 -1.0) #C(1.0 1.0)  1)
+   (test-crawler #C(-1.0 -1.0) #C(1.0 1.0)  2)
+   (test-crawler #C(-1.0 -1.0) #C(1.0 1.0)  10)
+   (test-crawler #C(-1.0 -1.0) #C(1.0 1.0)  100)
+   (test-crawler #C(-0.01 0)   #C(0 0)      1)
+   (test-crawler #C(-0.01 0)   #C(0 1.0)    200)
+   (test-crawler #C(1 0)       #C(-1 0)     77)
+   (test-crawler #C(0 1.5)     #C(0 -.002)  15)
+   (test-crawler #C(-0.2 0.5)  #C(-0.3 0.5) 55)))

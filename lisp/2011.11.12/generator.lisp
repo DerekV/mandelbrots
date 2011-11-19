@@ -57,17 +57,27 @@
 ;;  as a side effect increments the crawler.
 
 (defun make-crawler (&key from to resolution)
-  (let ((increment (/ (- to from) (- resolution 1)))
-	(next from))
-    (lambda ()
-      (if next
-	  (let ((current next))
-	    (if (or (> (realpart current) (realpart to))
-		    (> (imagpart current) (imagpart to)))
-		(setf next nil)
-		(progn
-		  (setf next (+ current increment))
-		  current)))))))
+  (cond 
+    ((< resolution 1)
+     (lambda () nil))
+    ((= resolution 1) 
+     (let ((spent '()))
+       (lambda () 
+	 (if (not spent)
+	     (progn
+	       (setq spent 't)
+	       to)))))
+    ((> resolution 1)     
+     (let ((increment (/ (- to from) (- resolution 1)))
+	   (times-left resolution)
+	   (current from))
+       (lambda ()
+	 (if (> times-left 0)
+	     (let ((temp current))
+	       (setq temp current)
+	       (setq current (+ current increment))
+	       (incf times-left -1)
+	       temp)))))))
 
 (defun get-next-point (crawler)
   (funcall crawler))
