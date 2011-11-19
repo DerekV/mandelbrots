@@ -1,0 +1,25 @@
+
+* About this 
+  generates mandlebrots, see readme in project root directory
+  one iteration of a programming excersize
+
+* requirements
+  - common lisp ( tested with sbcl on linux amd64 )
+  - [[http://www.xach.com/lisp/zpng/][zpng]]
+   
+* notes
+** load system into lisp
+*** load system with asdf : 
+    Like so:
+  #+BEGIN_SRC lisp -n -r -l
+    (push "/home/derek/projects/mandlebrots/lisp/2011.11.12/" asdf:*central-registry*) 
+    (asdf:operate 'asdf:load-op :generator)
+#+END_SRC
+    
+*** alternatively
+    load in zpng
+    evaluate all the lisp files found in this directory in the order seen under :componants in the .asd file.
+
+
+
+    
